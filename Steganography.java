@@ -56,8 +56,8 @@ public class Steganography
 	{
 		int pixelX  = 0;
 		int pixelY  = 0;
-		int colorflag    = 0; 			// flag % 3  = 0 red 1 green 2 blue
-		int flag
+		int colorflag    = 0; 			// colorflag % 3  = 0 red 1 green 2 blue
+		int flag = 0;					// flag 0 means even flag 1 means odd
 		BufferedImage newImage = ImageIO.write(image);
 		Scanner sc =new Scanner(message);
 		while(sc.hasNextLine())
@@ -66,23 +66,106 @@ public class Steganography
 			String binaryString = toBinary(s).toString();
 			while(binaryString.length()>0)
 			{
+				//checking the bit 
 				char c = binaryString.char(0);
+				if(c == '1')
+					flag = 1;
+				if(c == '0')
+					flag = 0;
+				//getting the argb value of the pixel
 				int colorRed   = extractRed(rgb,pixelX,pixelY);
 				int colorGreen = extractGreen(rgb,pixelX,pixelY);
 				int colorBlue  = extractBlue(rgb,pixelX,pixelY);
+				int alpha      = (rgb[pixelY*width+pixelX] >> 24) & 0xFF;
+				//encoding the bit to the pixel
 				switch(colorflag % 3)
 				{
 					case 0: //red
+						if(colorRed % 2 ==0)		//colorRed is even
+						{
+							if(flag)				//bit is a 1 so colorRed needs to be odd
+							{
+								colorRed++;
+							}
+							else					//bit is a 0 so colorRed needs to be even
+							{
+								colorRed+=0;
+							}
+						}
+						else						//colorRed is odd
+						{
+							if(flag)				//bit is a 1 so colorRed needs to be odd
+							{
+								colorRed +=0
+							}
+							else					//bit is a 1 so colorRed needs to be even
+							{
+								colorRed++;
+							}
+
+						}
+						colorflag++;
 						break;
 					case 1: //green
+						if(colorGreen % 2 ==0)		//colorGreen is even
+						{
+							if(flag)				//bit is a 1 so colorGreen needs to be odd
+							{
+								colorGreen++;
+							}
+							else					//bit is a 0 so colorGreen needs to be even
+							{
+								colorGreen+=0;
+							}
+						}
+						else						//colorGreen is odd
+						{
+							if(flag)				//bit is a 1 so colorGreen needs to be odd
+							{
+								colorGreen+=0
+							}
+							else					//bit is a 1 so colorGreen needs to be even
+							{
+								colorGreen++;
+							}
+
+						}
+						colorflag++;
 						break;
 					case 2: //blue
+						if(colorBlue % 2 ==0)		//colorBlue is even
+						{
+							if(flag)				//bit is a 1 so colorBlue needs to be odd
+							{
+								colorBlue++;
+							}
+							else					//bit is a 0 so colorBlue needs to be even
+							{
+								colorBlue+=0;
+							}
+						}
+						else						//colorBlue is odd
+						{
+							if(flag)				//bit is a 1 so colorBlue needs to be odd
+							{
+								colorBlue+=0
+							}
+							else					//bit is a 1 so colorBlue needs to be even
+							{
+								colorBlue++;
+							}
+
+						}
+						colorflag++;
 						break;
 				}
-
-
-
-
+				//creating the new pixel and adding to the new image
+				if(colorflag>=3 && colorflag % 3 ==0)
+				{
+					int newPixel = (alpha << 24) | (colorRed<<16) | (colorGreen<<8) | colorBlue;
+					newImage.setRGB(pixelX,pixelY,newPixel);
+				}
+				//next bit
 				if(binaryString.length>1)
 					binaryString = binaryString.substring(1);
 				else
@@ -90,6 +173,8 @@ public class Steganography
 
 			}
 		}
+		//encode the end of file byte
+		
 	}
 
 
